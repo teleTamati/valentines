@@ -49,8 +49,8 @@ export default function ValentinesProposal() {
   }, [step]);
 
   const getRandomPosition = () => ({
-    top: `${10 + Math.random() * 70}%`,
-    left: `${5 + Math.random() * 70}%`,
+    top: `${5 + Math.random() * 80}%`,
+    left: `${5 + Math.random() * 80}%`,
   });
 
   const handleYesClick = () => {
@@ -143,11 +143,11 @@ export default function ValentinesProposal() {
               className={`text-4xl md:text-5xl font-light tracking-widest mb-3 ${cinzel.className}`}
               style={{ color: "#d4af37", textShadow: "0 0 40px rgba(212,175,55,0.4)" }}
             >
-              You Did It champ x
+              You Did It
             </h2>
             <p className={`text-xl md:text-2xl font-light italic ${cormorant.className}`}
               style={{ color: "rgba(255,255,255,0.7)" }}>
-              You're actually not slow lol
+              Every memory unlocked, every moment revealed...
             </p>
           </motion.div>
         )}
@@ -178,13 +178,13 @@ export default function ValentinesProposal() {
               className={`text-4xl md:text-5xl font-light tracking-widest ${cinzel.className}`}
               style={{ color: "#fff", textShadow: "0 0 60px rgba(212,175,55,0.3)" }}
             >
-              I hope you liked the game
+              I Have Something
             </h2>
             <h2
               className={`text-4xl md:text-5xl font-light tracking-widest mt-1 ${cinzel.className}`}
               style={{ color: "#c41e3a", textShadow: "0 0 40px rgba(196,30,58,0.5)" }}
             >
-              I really love you Grace
+              To Tell You
             </h2>
           </motion.div>
         )}
@@ -276,38 +276,30 @@ export default function ValentinesProposal() {
                 }}
                 onClick={handleYesClick}
               >
-                <span className="relative z-10">Yes🥰</span>
+                <span className="relative z-10">Yes, Always 🥰</span>
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   style={{ background: "linear-gradient(135deg, #d4224a, #a00010)" }} />
               </button>
 
               <button
-                className="px-8 py-3 text-base font-semibold tracking-widest transition-all duration-200"
-                style={
-                  position
-                    ? {
-                        position: "absolute",
-                        top: position.top,
-                        left: position.left,
-                        background: "rgba(30,30,30,0.8)",
-                        color: "rgba(255,255,255,0.4)",
-                        border: "1px solid rgba(255,255,255,0.1)",
-                        borderRadius: "2px",
-                        fontFamily: cinzel.style.fontFamily,
-                        letterSpacing: "0.1em",
-                        fontSize: "0.75rem",
-                        whiteSpace: "nowrap",
-                      }
-                    : {
-                        background: "rgba(30,30,30,0.8)",
-                        color: "rgba(255,255,255,0.4)",
-                        border: "1px solid rgba(255,255,255,0.1)",
-                        borderRadius: "2px",
-                        fontFamily: cinzel.style.fontFamily,
-                        letterSpacing: "0.1em",
-                      }
-                }
+                className="px-6 py-2 text-sm font-semibold tracking-widest transition-all duration-300"
+                style={{
+                  position: "fixed",
+                  top: position ? position.top : "60%",
+                  left: position ? position.left : "65%",
+                  zIndex: 9999,
+                  background: "rgba(30,30,30,0.85)",
+                  color: "rgba(255,255,255,0.45)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: "2px",
+                  fontFamily: cinzel.style.fontFamily,
+                  letterSpacing: "0.1em",
+                  whiteSpace: "nowrap",
+                  transition: "top 0.15s ease, left 0.15s ease",
+                  cursor: "pointer",
+                }}
                 onMouseEnter={() => setPosition(getRandomPosition())}
+                onTouchStart={() => setPosition(getRandomPosition())}
                 onClick={() => setPosition(getRandomPosition())}
               >
                 No 😢
@@ -375,7 +367,7 @@ export default function ValentinesProposal() {
             </p>
             <p className="text-lg font-light italic mb-6"
               style={{ color: "rgba(212,175,55,0.7)" }}>
-              Thanks for playing, and for always being you x
+              Every day with you is a gift I&apos;ll never take for granted. 💌
             </p>
 
             <Image
