@@ -2,18 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Valentines: A Romantic Card Game with a Surprise Proposal",
-  description:
-    "Play a unique Valentine's card game. Complete the collection to reveal a romantic proposal!",
-  keywords: [
-    "Valentine's card game",
-    "romantic proposal game",
-    "photo card challenge",
-    "Valentine's Day surprise",
-    "couples game",
-    "valentine's day game",
-    "proposal game",
-  ],
+  title: "Happy Valentine's Day Babe 💕",
+  description: "Hope you enjoy this little surprise I made for you! I'll see you around",
 };
 
 export default function RootLayout({
@@ -23,7 +13,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body style={{ margin: 0, padding: 0, background: "#000" }}>
+        {children}
+      </body>
     </html>
   );
 }

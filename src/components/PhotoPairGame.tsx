@@ -2,44 +2,23 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
-// 18 images
-const images = [
-  "/game-photos/1.avif",
-  "/game-photos/2.avif",
-  "/game-photos/3.avif",
-  "/game-photos/4.avif",
-  "/game-photos/5.avif",
-  "/game-photos/6.avif",
-  "/game-photos/7.avif",
-  "/game-photos/8.avif",
-  "/game-photos/9.avif",
-  "/game-photos/10.avif",
-  "/game-photos/11.avif",
-  "/game-photos/12.avif",
-  "/game-photos/13.avif",
-  "/game-photos/14.avif",
-  "/game-photos/15.avif",
-  "/game-photos/16.avif",
-  "/game-photos/17.avif",
-  "/game-photos/18.avif",
-];
-
-// Create 18 pairs of images (36 images in total)
-const imagePairs = images.flatMap((image) => [image, image]);
+const imageList = Array.from({ length: 18 }, (_, i) => `/game-photos/${i + 1}.jpg`);
+const imagePairs = imageList.flatMap((image) => [image, image]);
 
 const shuffleArray = (array: string[]) => {
-  for (let i = array.length - 1; i > 0; i--) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-  return array;
+  return arr;
 };
 
 const heartLayout = [
-  [null, null, 0, 1, null, 2, 3, null, null],
-  [null, 4, 5, 6, 7, 8, 9, 10, null],
+  [null, null, 0,  1,  null, 2,  3,  null, null],
+  [null, 4,  5,  6,  7,  8,  9,  10, null],
   [11, 12, 13, 14, 15, 16, 17, 18, 19],
   [null, 20, 21, 22, 23, 24, 25, 26, null],
   [null, null, 27, 28, 29, 30, 31, null, null],
@@ -47,20 +26,38 @@ const heartLayout = [
   [null, null, null, null, 35, null, null, null, null],
 ];
 
-type ValentinesProposalProps = {
+type Props = {
   handleShowProposal: () => void;
 };
 
-export default function PhotoPairGame({
-  handleShowProposal,
-}: ValentinesProposalProps) {
+export default function PhotoPairGame({ handleShowProposal }: Props) {
+  // All hooks at the top — no early returns before this point
   const [selected, setSelected] = useState<number[]>([]);
   const [matched, setMatched] = useState<number[]>([]);
   const [incorrect, setIncorrect] = useState<number[]>([]);
-  const [images] = useState(() => shuffleArray([...imagePairs]));
+  const [images, setImages] = useState<string[]>(imagePairs);
+  const [mounted, setMounted] = useState(false);
 
-  const handleClick = async (index: number) => {
-    if (selected.length === 2 || matched.includes(index) || selected.includes(index)) return;
+  // Shuffle only on client to avoid hydration mismatch
+  useEffect(() => {
+    setImages(shuffleArray([...imagePairs]));
+    setMounted(true);
+  }, []);
+
+  // Win condition
+  useEffect(() => {
+    if (mounted && matched.length === imagePairs.length) {
+      handleShowProposal();
+    }
+  }, [matched, mounted, handleShowProposal]);
+
+  const handleClick = useCallback(async (index: number) => {
+    if (
+      selected.length === 2 ||
+      matched.includes(index) ||
+      selected.includes(index)
+    )
+      return;
 
     if (selected.length === 1) {
       const firstIndex = selected[0];
@@ -70,37 +67,25 @@ export default function PhotoPairGame({
         setMatched((prev) => [...prev, firstIndex, index]);
         setSelected([]);
       } else {
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second
-
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         setIncorrect([firstIndex, index]);
-        setTimeout(() => setIncorrect([]), 1000); // Clear incorrect after 1 second
+        setTimeout(() => setIncorrect([]), 1000);
         setTimeout(() => setSelected([]), 1000);
       }
     } else {
       setSelected([index]);
     }
-  };
+  }, [selected, matched, images]);
 
-  // Check if game is won
-  useEffect(() => {
-    if (matched.length === imagePairs.length) {
-      handleShowProposal();
-    }
-  }, [matched, handleShowProposal]);
+  // Early return AFTER all hooks
+  if (!mounted) return null;
 
   return (
     <div className="grid grid-cols-9 gap-1 lg:gap-2 max-w-[95vw] mx-auto place-items-center">
-      {/* Image preload */}
+      {/* Preload images */}
       <div className="hidden">
         {images.map((image, i) => (
-          <Image
-            key={i}
-            src={image}
-            alt={`Image ${i + 1}`}
-            fill
-            className="object-cover"
-            priority
-          />
+          <Image key={i} src={image} alt="" fill className="object-cover" priority />
         ))}
       </div>
 
@@ -109,58 +94,95 @@ export default function PhotoPairGame({
           <motion.div
             key={i}
             className="w-[11vh] h-[11vh] lg:w-20 lg:h-20 relative cursor-pointer"
-            whileHover={{ scale: 1.1 }}
+            whileHover={{ scale: matched.includes(index) ? 1 : 1.08 }}
             onClick={() => handleClick(index)}
-            style={{ perspective: "1000px" }} // Add perspective for 3D effect
+            style={{ perspective: "1000px" }}
           >
-            {/* Back of the card */}
+            {/* Card back — deep red/gold */}
             {!selected.includes(index) && !matched.includes(index) && (
               <motion.div
-                className="w-full h-full bg-gray-300 rounded-sm lg:rounded-md absolute z-10"
+                className="w-full h-full absolute z-10 rounded-sm lg:rounded-md overflow-hidden"
                 initial={{ rotateY: 0 }}
-                animate={{
-                  rotateY:
-                    selected.includes(index) || matched.includes(index)
-                      ? 180
-                      : 0,
-                }}
+                animate={{ rotateY: selected.includes(index) ? 180 : 0 }}
                 transition={{ duration: 0.5 }}
                 style={{ backfaceVisibility: "hidden" }}
-              />
+              >
+                <div
+                  className="w-full h-full flex items-center justify-center"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #3d0010 0%, #1a0005 40%, #2a0800 70%, #1c0a00 100%)",
+                    border: "1px solid rgba(212,175,55,0.35)",
+                    boxShadow: "inset 0 0 12px rgba(196,30,58,0.2)",
+                  }}
+                >
+                  <svg width="30" height="27" viewBox="0 0 60 54" fill="none" opacity="0.55">
+                    <path
+                      d="M30 52C30 52 2 34 2 16C2 8.3 8.3 2 16 2C21.5 2 26.3 5.1 28.8 9.7L30 12L31.2 9.7C33.7 5.1 38.5 2 44 2C51.7 2 58 8.3 58 16C58 34 30 52 30 52Z"
+                      fill="url(#cardHeart)"
+                    />
+                    <defs>
+                      <linearGradient id="cardHeart" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="#d4af37" />
+                        <stop offset="100%" stopColor="#b8960c" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+              </motion.div>
             )}
 
-            {/* Front of the card (image) */}
+            {/* Card front — photo */}
             {(selected.includes(index) || matched.includes(index)) && (
               <motion.div
-                className="w-full h-full absolute"
+                className="w-full h-full absolute rounded-sm lg:rounded-md overflow-hidden"
                 initial={{ rotateY: -180 }}
                 animate={{ rotateY: 0 }}
                 transition={{ duration: 0.5 }}
-                style={{ backfaceVisibility: "hidden" }}
+                style={{
+                  backfaceVisibility: "hidden",
+                  boxShadow: matched.includes(index)
+                    ? "0 0 12px rgba(212,175,55,0.7), 0 0 4px rgba(212,175,55,0.4)"
+                    : "none",
+                  border: matched.includes(index)
+                    ? "1px solid rgba(212,175,55,0.6)"
+                    : "1px solid rgba(196,30,58,0.3)",
+                }}
               >
                 <Image
                   src={images[index]}
-                  alt={`Imagen ${index + 1}`}
+                  alt={`Memory ${index + 1}`}
                   fill
-                  className="rounded-sm lg:rounded-md object-cover"
+                  className="object-cover"
                 />
+                {matched.includes(index) && (
+                  <motion.div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgba(212,175,55,0.15) 0%, transparent 60%)",
+                    }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: [0, 1, 0.5] }}
+                    transition={{ duration: 0.8 }}
+                  />
+                )}
               </motion.div>
             )}
 
-            {/* Incorrect animation */}
+            {/* Incorrect flash */}
             {incorrect.includes(index) && (
               <motion.div
-                className="absolute inset-0"
-                animate={{ scale: [1, 1.1, 1], opacity: [1, 0, 1] }}
-                transition={{ duration: 0.5 }}
-              >
-                <div className="w-full h-full bg-red-500 rounded-sm lg:rounded-md"></div>
-              </motion.div>
+                className="absolute inset-0 rounded-sm lg:rounded-md z-20"
+                animate={{ opacity: [0, 0.7, 0] }}
+                transition={{ duration: 0.6 }}
+                style={{ background: "rgba(139,0,0,0.8)" }}
+              />
             )}
           </motion.div>
         ) : (
           <div key={i} className="w-[11vh] h-[11vh] lg:w-20 lg:h-20" />
-        ),
+        )
       )}
     </div>
   );
